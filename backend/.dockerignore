@@ -2,3 +2,6 @@ venv
 venv/
 venv/*
 db.sqlite3
+
+migrations/
+!migrations/0001_initial.py
