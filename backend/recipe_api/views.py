@@ -2,29 +2,133 @@ from django.shortcuts import render
 from django.views.generic.base import TemplateView
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
+from django.http import HttpResponse
+from django.utils import timezone
 
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets
+from rest_framework import filters
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from .models import Follow, Recipe, RecipeIngredient
+from django_filters.rest_framework import DjangoFilterBackend
 
+from .models import Follow, Recipe,Ingredient, RecipeIngredient, Tag, Favorite, ShoppingCart
+from .filters import RecipeFilter
+from .permissions import AdminOrAuthorOrReadOnly
 
 from .serializers import (FollowCreateSerializer,
                           ShowFollowUserListOrDetailSerializer,
                           RecipeSerializer,
                           ShowIngredientsInRecipe,
-                          RecipeCreateSerializer)
+                          RecipeCreateSerializer,
+                          TagsSerializer,
+                          IngredientSerializer,
+                          FavoriteSerializer,
+                          ShoppingCartSerializer)
 User = get_user_model()
 
 
 class DockTemplate(TemplateView):
     template_name = 'docs/redoc.html'
 
+class TagsViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagsSerializer
+    permission_classes = [AllowAny, ]
+    pagination_class = None
+
+class IngredientViewSet(viewsets.ModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    permission_classes = [AllowAny, ]
+    pagination_class = None
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ("name",)
+
+class FavoriteAPIView(APIView):
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request, recipe_id):
+        user = self.request.user.id
+        recipe = recipe_id
+        data = {
+            "user": user,
+            "recipe": recipe
+        }
+        serializer = FavoriteSerializer(
+            data=data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, recipe_id):
+        user = self.request.user
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        obj = get_object_or_404(Favorite, user=user, recipe=recipe)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ShoppingCartAPIView(APIView):
+    permission_classes = [IsAuthenticated, ]
+    def get(self, request, recipe_id):
+        user = self.request.user.id
+        recipe = recipe_id
+        data = {
+            "user": user,
+            "recipe": recipe
+        }
+        context = {"request": request}
+        serializer = ShoppingCartSerializer(
+            data=data,
+            context=context,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, recipe_id):
+        user = self.request.user
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        obj = get_object_or_404(ShoppingCart, user=user, recipe=recipe)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ShoppingCartDownloadsAPIView(APIView):
+    permission_classes = [IsAuthenticated, ]
+    def get(self, request):
+        user_shopping_list = RecipeIngredient.objects.filter(
+            recipe__shopping_cart__user=request.user).values_list(
+            'ingredient__name', 'amount', 'ingredient__measurement_unit')
+        all_count_ingredients = user_shopping_list.values(
+            'ingredient__name', 'ingredient__measurement_unit').annotate(
+            total=Sum('amount')).order_by('-total')
+        ingredients_list = []
+        for ingredient in all_count_ingredients:
+            ingredients_list.append(
+                f'{ingredient["ingredient__name"]} - '
+                f'{ingredient["total"]} '
+                f'{ingredient["ingredient__measurement_unit"]} \n'
+            )
+        return HttpResponse(ingredients_list, {
+            'content_type': 'text/plain',
+            'Content-Disposition': 'attachment; filename="shopping_list.txt"'
+        })
+
+
+
+        return Response({"dsa":"dsa"})
+
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
+    permission_classes = [AdminOrAuthorOrReadOnly, ]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         method = self.request.method
@@ -41,6 +145,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class ShowListUserFollow(APIView):
+    permission_classes = [IsAuthenticated, ]
     def get(self, request):
         user = self.request.user
         context = self.request
@@ -51,6 +156,7 @@ class ShowListUserFollow(APIView):
 
 
 class FollowCreateDelete(APIView):
+    permission_classes = [IsAuthenticated, ]
     def get(self, request, author_id):
         data = {
             "user": self.request.user.id,

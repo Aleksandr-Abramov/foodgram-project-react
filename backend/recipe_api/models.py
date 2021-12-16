@@ -38,7 +38,7 @@ class Recipe(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название рецепта')
     # image = models.ImageField()
     text = models.TextField( verbose_name='Описание рецепта')
-    cooking_time = models.PositiveSmallIntegerField(default=1)
+    cooking_time = models.PositiveSmallIntegerField()
 
     class Meta:
         ordering = ('-id',)
@@ -101,3 +101,54 @@ class Follow(models.Model):
 
     def __str__(self):
         return f'{self.user} following {self.author}'
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Пользователь",
+        related_name="favorite_user"
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name="Рецепт",
+        related_name="favorite_recipe"
+    )
+
+    class Meta:
+        verbose_name = "Избранные"
+        verbose_name_plural = verbose_name
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "recipe"],
+                name="unique_favorite"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user} added {self.recipe}"
+
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='shopping_cart',
+        verbose_name='Пользователь'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='shopping_cart',
+        verbose_name='Рецепт'
+    )
+
+    class Meta:
+        verbose_name = 'Корзина'
+        verbose_name_plural = verbose_name
+        constraints = [models.UniqueConstraint(fields=['user', 'recipe'],
+                                               name='unique_shopping_cart')]
+
+    def __str__(self):
+        return f'{self.user} added {self.recipe}'
+
