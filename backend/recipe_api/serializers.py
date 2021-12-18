@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 
+from .fields import Base64ImageField
 from .models import (Follow,
                      User,
                      Recipe,
@@ -42,13 +43,20 @@ class TagsSerializer(serializers.ModelSerializer):
 # сериализация для Favorite
 
 class FavoriteDetailSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Recipe
         fields = (
             "id",
             "name",
+            "image",
             "cooking_time"
         )
+
+    def get_image(self, obj):
+        photo_url = obj.image.url
+        return photo_url
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -159,6 +167,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             "is_favorited",
             "is_in_shopping_cart",
             "name",
+            "image",
             "text",
             "cooking_time",
         )
@@ -195,6 +204,9 @@ class RecipeCreateIngridientSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
+    image = Base64ImageField(
+        use_url=True
+    )
     ingredients = RecipeCreateIngridientSerializer(many=True)
     author = RecipeUserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
@@ -206,6 +218,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             "ingredients",
             "tags",
             "author",
+            "image",
             "name",
             "text",
             "cooking_time",
@@ -266,6 +279,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         author = self.context["request"].user
 
         recipe.author = author
+        recipe.image = validated_data.get("image", recipe.image)
         recipe.text = validated_data.get("text", recipe.text)
         recipe.name = validated_data.get("name", recipe.name)
         recipe.cooking_time = validated_data.get("cooking_time", recipe.cooking_time)
@@ -301,13 +315,21 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
 
 class ShowFollowRecipeUserSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
     class Meta:
         model = Recipe
         fields = (
             "id",
             "name",
+            "image",
             "cooking_time",
         )
+
+    def get_image(self, obj):
+        photo_url = obj.image.url
+        return photo_url
+
+
 
 
 class ShowFollowUserListOrDetailSerializer(serializers.ModelSerializer):

@@ -130,3 +130,11 @@ dmypy.json
 
 # .idea
 .idea
+
+backend/recipe_api/migrations
+backend/users/migrations
+!backend/users/migrations/__init__.py
+!backend/recipe_api/migrations/__init__.py
+
+media/
+backend/data/

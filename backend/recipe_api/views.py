@@ -16,7 +16,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Follow, Recipe,Ingredient, RecipeIngredient, Tag, Favorite, ShoppingCart
-from .filters import RecipeFilter
+from .filters import RecipeFilter, IngredientFilter
 from .permissions import AdminOrAuthorOrReadOnly
 
 from .serializers import (FollowCreateSerializer,
@@ -45,8 +45,8 @@ class IngredientViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = [AllowAny, ]
     pagination_class = None
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ("name",)
+    filter_backends = [DjangoFilterBackend, ]
+    filterset_class = IngredientFilter
 
 class FavoriteAPIView(APIView):
     permission_classes = [IsAuthenticated, ]
@@ -127,7 +127,7 @@ class ShoppingCartDownloadsAPIView(APIView):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = [AdminOrAuthorOrReadOnly, ]
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
