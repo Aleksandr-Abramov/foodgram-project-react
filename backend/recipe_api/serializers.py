@@ -308,6 +308,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 'request': self.context.get('request')
             }
         ).data
+        # print(data["image"])
+        data["image"] = instance.image.url
+        # print(data["image"])
         return data
 
 

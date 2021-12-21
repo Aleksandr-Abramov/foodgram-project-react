@@ -9,6 +9,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import generics
 from rest_framework import viewsets
 from rest_framework import filters
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -75,6 +76,7 @@ class FavoriteAPIView(APIView):
 
 class ShoppingCartAPIView(APIView):
     permission_classes = [IsAuthenticated, ]
+    # authentication_classes = [IsAuthenticated, ]
     def get(self, request, recipe_id):
         user = self.request.user.id
         recipe = recipe_id
@@ -100,6 +102,7 @@ class ShoppingCartAPIView(APIView):
 
 class ShoppingCartDownloadsAPIView(APIView):
     permission_classes = [IsAuthenticated, ]
+    # authentication_classes = [IsAuthenticated, ]
     def get(self, request):
         user_shopping_list = RecipeIngredient.objects.filter(
             recipe__shopping_cart__user=request.user).values_list(
@@ -146,6 +149,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 class ShowListUserFollow(APIView):
     permission_classes = [IsAuthenticated, ]
+
     def get(self, request):
         user = self.request.user
         context = self.request
@@ -154,9 +158,24 @@ class ShowListUserFollow(APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+# class ShowListUserFollow(generics.ListAPIView):
+#     queryset = User.objects.all()
+#     permission_classes = [IsAuthenticated, ]
+#     serializer_class = ShowFollowUserListOrDetailSerializer
+#
+#     def get_queryset(self):
+#         user = self.request.user
+#         return User.objects.filter(following__user=user)
+#
+#     def get_serializer_class(self):
+#         context = super().get_serializer_context()
+#         context.update({'request': self.request})
+#         return context
+
 
 class FollowCreateDelete(APIView):
     permission_classes = [IsAuthenticated, ]
+    # authentication_classes = [IsAuthenticated]
     def get(self, request, author_id):
         data = {
             "user": self.request.user.id,
