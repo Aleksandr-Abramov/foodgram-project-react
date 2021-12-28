@@ -1,22 +1,11 @@
-from django.shortcuts import get_object_or_404
-
 from rest_framework import serializers
 
 from .fields import Base64ImageField
-from .models import (Follow,
-                     User,
-                     Recipe,
-                     RecipeIngredient,
-                     Ingredient,
-                     Tag,
-                     Favorite,
-                     ShoppingCart)
-
-from users.serializers import UserDetailSerializer
+from .models import (Favorite, Follow, Ingredient, Recipe, RecipeIngredient,
+                     ShoppingCart, Tag, User)
 
 
 # сериализация для Ingridient
-
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
@@ -28,7 +17,6 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 # сериализация для Tags
-
 class TagsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -41,7 +29,6 @@ class TagsSerializer(serializers.ModelSerializer):
 
 
 # сериализация для Favorite
-
 class FavoriteDetailSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
 
@@ -55,8 +42,8 @@ class FavoriteDetailSerializer(serializers.ModelSerializer):
         )
 
     def get_image(self, obj):
-        photo_url = obj.image.url
-        return photo_url
+        # photo_url = obj.image.url
+        return obj.image.url
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -75,7 +62,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
         user = self.context.get("request").user
         recipe_id = data["recipe"].id
         if (self.context.get("request").method == "GET"
-                and Favorite.objects.filter(user=user, recipe=recipe_id).exists()):
+                and Favorite.objects.filter(user=user,
+                                            recipe=recipe_id).exists()):
             raise serializers.ValidationError(
                 "Рецепт уже добавлен в избранное"
             )
@@ -91,9 +79,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
         ).data
         return data
 
-    # сериализация для ShoppingCart
 
-
+# сериализация для ShoppingCart
 class ShoppingCartSerializer(FavoriteSerializer):
     class Meta(FavoriteSerializer.Meta):
         model = ShoppingCart
@@ -113,7 +100,6 @@ class ShoppingCartSerializer(FavoriteSerializer):
 
 
 # сериализация для Recipe
-
 class RecipeUserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
@@ -138,7 +124,8 @@ class RecipeUserSerializer(serializers.ModelSerializer):
 class ShowIngredientsInRecipe(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(
+        source="ingredient.measurement_unit")
 
     class Meta:
         model = RecipeIngredient
@@ -156,6 +143,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags = TagsSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -190,6 +178,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = request.user
         return ShoppingCart.objects.filter(recipe=recipe, user=user).exists()
 
+    def get_image(self, obj):
+        # photo_url = obj.image.url
+        return obj.image.url
+
 
 class RecipeCreateIngridientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
@@ -209,7 +201,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     )
     ingredients = RecipeCreateIngridientSerializer(many=True)
     author = RecipeUserSerializer(read_only=True)
-    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
+    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(),
+                                              many=True)
 
     class Meta:
         model = Recipe
@@ -228,7 +221,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         sum_tags = self.initial_data.get("tags")
         len_tags = len(sum_tags)
         if len_tags == 0:
-            raise serializers.ValidationError("Пожалуйста, добавте минимум 1 тэг.")
+            raise serializers.ValidationError(
+                "Пожалуйста, добавте минимум 1 тэг.")
         if len_tags > len(set(sum_tags)):
             raise serializers.ValidationError("Теги не должны повторятся")
         return tags
@@ -237,10 +231,12 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ingredients = self.initial_data.get("ingredients")
         correct_ingredients = []
         if not ingredients:
-            raise serializers.ValidationError("Пожалуйста, добавте минимум 1 ингридиент.")
+            raise serializers.ValidationError(
+                "Пожалуйста, добавте минимум 1 ингридиент.")
         for ingridient in ingredients:
             if int(ingridient["amount"]) <= 0:
-                raise serializers.ValidationError("Количество должно быть положительным!")
+                raise serializers.ValidationError(
+                    "Количество должно быть положительным!")
 
         for item in ingredients:
             if correct_ingredients.count(item['id']):
@@ -254,8 +250,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def validate_cooking_time(self, data):
         if data <= 0:
-            raise serializers.ValidationError('Время готовки не может быть'
-                                              ' отрицательным числом или нулем!')
+            raise serializers.ValidationError(
+                'Время готовки не может быть'
+                ' отрицательным числом или нулем!')
         return data
 
     def create(self, validated_data):
@@ -282,7 +279,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         recipe.image = validated_data.get("image", recipe.image)
         recipe.text = validated_data.get("text", recipe.text)
         recipe.name = validated_data.get("name", recipe.name)
-        recipe.cooking_time = validated_data.get("cooking_time", recipe.cooking_time)
+        recipe.cooking_time = validated_data.get("cooking_time",
+                                                 recipe.cooking_time)
         if "tags" in self.initial_data:
             data_tags = validated_data.pop("tags")
             recipe.tags.set(data_tags)
@@ -308,17 +306,14 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 'request': self.context.get('request')
             }
         ).data
-        # print(data["image"])
         data["image"] = instance.image.url
-        # print(data["image"])
         return data
 
 
 # cериализация для Follow
-
-
 class ShowFollowRecipeUserSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
+
     class Meta:
         model = Recipe
         fields = (
@@ -329,10 +324,8 @@ class ShowFollowRecipeUserSerializer(serializers.ModelSerializer):
         )
 
     def get_image(self, obj):
-        photo_url = obj.image.url
-        return photo_url
-
-
+        # photo_url = obj.image.url
+        return obj.image.url
 
 
 class ShowFollowUserListOrDetailSerializer(serializers.ModelSerializer):
@@ -352,6 +345,7 @@ class ShowFollowUserListOrDetailSerializer(serializers.ModelSerializer):
             "recipes",
             "recipes_count",
         )
+        # read_only_fields = fields
 
     def get_is_subscribed(self, obj):
         user = self.context.user
@@ -362,7 +356,10 @@ class ShowFollowUserListOrDetailSerializer(serializers.ModelSerializer):
         ).exists()
 
     def get_recipes(self, obj):
-        return ShowFollowRecipeUserSerializer(obj.recipes.all(), many=True).data
+        return ShowFollowRecipeUserSerializer(
+            obj.recipes.all(),
+            many=True
+        ).data
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()

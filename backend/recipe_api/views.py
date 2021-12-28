@@ -1,45 +1,36 @@
-from django.shortcuts import render
-from django.views.generic.base import TemplateView
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
-from django.utils import timezone
-
-from rest_framework import status
+from django.shortcuts import get_object_or_404
+from django.views.generic.base import TemplateView
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, status, viewsets
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics
-from rest_framework import viewsets
-from rest_framework import filters
-from rest_framework.permissions import AllowAny, IsAuthenticated
 
-from django_filters.rest_framework import DjangoFilterBackend
-
-from .models import Follow, Recipe,Ingredient, RecipeIngredient, Tag, Favorite, ShoppingCart
-from .filters import RecipeFilter, IngredientFilter
+from .filters import IngredientFilter, RecipeFilter
+from .models import (Favorite, Follow, Ingredient, Recipe, RecipeIngredient,
+                     ShoppingCart, Tag)
 from .permissions import AdminOrAuthorOrReadOnly
+from .serializers import (FavoriteSerializer, FollowCreateSerializer,
+                          IngredientSerializer, RecipeCreateSerializer,
+                          RecipeSerializer, ShoppingCartSerializer,
+                          ShowFollowUserListOrDetailSerializer, TagsSerializer)
 
-from .serializers import (FollowCreateSerializer,
-                          ShowFollowUserListOrDetailSerializer,
-                          RecipeSerializer,
-                          ShowIngredientsInRecipe,
-                          RecipeCreateSerializer,
-                          TagsSerializer,
-                          IngredientSerializer,
-                          FavoriteSerializer,
-                          ShoppingCartSerializer)
 User = get_user_model()
 
 
 class DockTemplate(TemplateView):
     template_name = 'docs/redoc.html'
 
+
 class TagsViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagsSerializer
     permission_classes = [AllowAny, ]
     pagination_class = None
+
 
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
@@ -48,6 +39,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
     pagination_class = None
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = IngredientFilter
+
 
 class FavoriteAPIView(APIView):
     permission_classes = [IsAuthenticated, ]
@@ -74,9 +66,10 @@ class FavoriteAPIView(APIView):
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class ShoppingCartAPIView(APIView):
     permission_classes = [IsAuthenticated, ]
-    # authentication_classes = [IsAuthenticated, ]
+
     def get(self, request, recipe_id):
         user = self.request.user.id
         recipe = recipe_id
@@ -100,9 +93,10 @@ class ShoppingCartAPIView(APIView):
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class ShoppingCartDownloadsAPIView(APIView):
     permission_classes = [IsAuthenticated, ]
-    # authentication_classes = [IsAuthenticated, ]
+
     def get(self, request):
         user_shopping_list = RecipeIngredient.objects.filter(
             recipe__shopping_cart__user=request.user).values_list(
@@ -123,10 +117,6 @@ class ShoppingCartDownloadsAPIView(APIView):
         })
 
 
-
-        return Response({"dsa":"dsa"})
-
-
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = [AdminOrAuthorOrReadOnly, ]
@@ -145,37 +135,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return context
 
 
-
-
-class ShowListUserFollow(APIView):
+class ShowListUserFollow(generics.ListAPIView):
     permission_classes = [IsAuthenticated, ]
+    serializer_class = ShowFollowUserListOrDetailSerializer
 
-    def get(self, request):
+    def get_queryset(self):
         user = self.request.user
+        return User.objects.filter(following__user=user)
+
+    def get_serializer_context(self):
         context = self.request
-        queryset = User.objects.filter(following__user=user)
-        serializer = ShowFollowUserListOrDetailSerializer(queryset, many=True, context=context)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-# class ShowListUserFollow(generics.ListAPIView):
-#     queryset = User.objects.all()
-#     permission_classes = [IsAuthenticated, ]
-#     serializer_class = ShowFollowUserListOrDetailSerializer
-#
-#     def get_queryset(self):
-#         user = self.request.user
-#         return User.objects.filter(following__user=user)
-#
-#     def get_serializer_class(self):
-#         context = super().get_serializer_context()
-#         context.update({'request': self.request})
-#         return context
+        return context
 
 
 class FollowCreateDelete(APIView):
     permission_classes = [IsAuthenticated, ]
-    # authentication_classes = [IsAuthenticated]
+
     def get(self, request, author_id):
         data = {
             "user": self.request.user.id,
