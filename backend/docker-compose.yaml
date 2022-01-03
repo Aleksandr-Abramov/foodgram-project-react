@@ -9,7 +9,8 @@ services:
     env_file:
       - ./.env
   backend:
-    build: .
+#    build: .
+    image: alexabramov1985/infra_backend_1
     restart: always
     command: gunicorn foodgram_api.wsgi:application --bind 0.0.0.0:8000
     ports:
