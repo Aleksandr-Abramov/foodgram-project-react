@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .filters import IngredientFilter, RecipeFilter
+from .filters import IngredientFilter, RecipeFilter, TagsFilter
 from .models import (Favorite, Follow, Ingredient, Recipe, RecipeIngredient,
                      ShoppingCart, Tag)
 from .permissions import AdminOrAuthorOrReadOnly
@@ -30,6 +30,8 @@ class TagsViewSet(viewsets.ModelViewSet):
     serializer_class = TagsSerializer
     permission_classes = [AllowAny, ]
     pagination_class = None
+    filter_backends = [DjangoFilterBackend, ]
+    filterset_class = TagsFilter
 
 
 class IngredientViewSet(viewsets.ModelViewSet):

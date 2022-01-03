@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from .validators import ValidationHEX
+
+from .validators import validation_hex
 
 User = get_user_model()
 
@@ -32,7 +33,7 @@ class Tag(models.Model):
     color = models.CharField(
         max_length=7,
         verbose_name="цвет",
-        validators=[ValidationHEX]
+        validators=[validation_hex]
     )
     slug = models.SlugField(
         verbose_name="слаг"

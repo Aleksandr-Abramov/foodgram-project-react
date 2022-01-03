@@ -1,7 +1,10 @@
 # from django.contrib import admin
 #
 # from .models import (Follow,
-#                      Recipe, RecipeIngredient, Tag, Ingredient, Favorite, ShoppingCart)
+#                      Recipe,
+#                      RecipeIngredient,
+#                      Tag, Ingredient,
+#                      Favorite, ShoppingCart)
 #
 #
 # admin.site.register(Follow)
