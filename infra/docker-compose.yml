@@ -26,13 +26,14 @@ services:
     env_file:
       - ../backend/.env
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    #build:
+    #  context: ../backend
+    # dockerfile: Dockerfile
+    image: alexabramov1985/infra_backend_1
     restart: always
-    command: gunicorn foodgram_api.wsgi:application --bind 0.0.0.0:8000
-    ports:
-      - "8000:8000"
+    #command: gunicorn foodgram_api.wsgi:application --bind 0.0.0.0:8000
+    #ports:
+    #  - "8000:8000"
     volumes:
       - static_value:/backend/static/
       - media_value:/backend/media/

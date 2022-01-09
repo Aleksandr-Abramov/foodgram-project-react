@@ -68,7 +68,7 @@ jobs:
           script: |
             sudo docker pull alexabramov1985/infra_backend_1 
             sudo docker-compose stop 
-            sudo docker-compose rm web 
+            sudo docker-compose rm infra_backend_1 
             # Создаст файл для переменных окружения 
             touch .env 
             # Наполнит файл переменными окружения из секретов GitHub 

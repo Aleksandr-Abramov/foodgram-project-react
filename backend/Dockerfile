@@ -10,4 +10,4 @@ COPY . /backend
 
 WORKDIR /backend
 
-CMD gunicorn create_api.wsgi:application --bind 0.0.0.0:8000
+CMD gunicorn foodgram_api.wsgi:application --bind 0.0.0.0:8000
