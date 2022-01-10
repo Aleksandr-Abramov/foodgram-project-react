@@ -137,4 +137,3 @@ dmypy.json
 #!backend/recipe_api/migrations/__init__.py
 
 media/
-backend/data/
