@@ -103,7 +103,11 @@ class RecipeIngredient(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Ингредиент"
     )
-    amount = models.PositiveSmallIntegerField(
+    # amount = models.PositiveSmallIntegerField(
+    #     verbose_name="Количество",
+    #     default=1
+    # )
+    amount = models.FloatField(
         verbose_name="Количество",
         default=1
     )
