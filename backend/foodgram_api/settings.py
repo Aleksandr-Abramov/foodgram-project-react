@@ -29,7 +29,8 @@ SECRET_KEY = 'aw$$m5w%+q(eac^vuydnmjd2=v7alvz@f(^a^hs=jh=#w=x0*r'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['62.84.125.136', '127.0.0.1', 'localhost', 'backend']
+# ALLOWED_HOSTS = ['62.84.125.136', '127.0.0.1', 'localhost', 'backend']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -40,8 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework.authtoken',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_filters',
     'djoser',
 
@@ -141,7 +142,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': (

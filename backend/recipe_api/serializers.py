@@ -115,10 +115,10 @@ class RecipeUserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        return Follow.objects.filter(
-            user=self.context.get("request").user,
-            author=obj
-        ).exists()
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        return Follow.objects.filter(user=request.user, author=obj).exists()
 
 
 class ShowIngredientsInRecipe(serializers.ModelSerializer):
