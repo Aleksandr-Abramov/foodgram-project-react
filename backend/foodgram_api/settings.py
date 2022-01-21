@@ -13,7 +13,6 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = False
 
-
 ALLOWED_HOSTS = ['62.84.125.136', '127.0.0.1', 'localhost', 'backend']
 
 
