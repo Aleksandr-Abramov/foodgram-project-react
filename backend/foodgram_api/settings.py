@@ -9,10 +9,9 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-# SECRET_KEY = os.getenv('SECRET_KEY')
-SECRET_KEY = 'aw$$m5w%+q(eac^vuydnmjd2=v7alvz@f(^a^hs=jh=#w=x0*r'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['62.84.125.136', '127.0.0.1', 'localhost', 'backend']
 
