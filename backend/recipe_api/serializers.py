@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .fields import Base64ImageField
 from .models import (Favorite, Follow, Ingredient, Recipe, RecipeIngredient,
                      ShoppingCart, Tag, User)
+from .validators import greater_than_zero
 
 
 # сериализация для Ingridient
@@ -42,7 +43,6 @@ class FavoriteDetailSerializer(serializers.ModelSerializer):
         )
 
     def get_image(self, obj):
-        # photo_url = obj.image.url
         return obj.image.url
 
 
@@ -58,7 +58,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        print(self.context.get("request").method)
         user = self.context.get("request").user
         recipe_id = data["recipe"].id
         if (self.context.get("request").method == "GET"
@@ -179,13 +178,12 @@ class RecipeSerializer(serializers.ModelSerializer):
         return ShoppingCart.objects.filter(recipe=recipe, user=user).exists()
 
     def get_image(self, obj):
-        # photo_url = obj.image.url
         return obj.image.url
 
 
 class RecipeCreateIngridientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-    amount = serializers.IntegerField()
+    amount = serializers.IntegerField(validators=[greater_than_zero])
 
     class Meta:
         model = RecipeIngredient
@@ -232,7 +230,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         correct_ingredients = []
         if not ingredients:
             raise serializers.ValidationError(
-                "Пожалуйста, добавте минимум 1 ингридиент.")
+                "Пожалуйста, добавте минимум 1 ингредиент.")
         for ingridient in ingredients:
             if int(ingridient["amount"]) <= 0:
                 raise serializers.ValidationError(
@@ -324,7 +322,6 @@ class ShowFollowRecipeUserSerializer(serializers.ModelSerializer):
         )
 
     def get_image(self, obj):
-        # photo_url = obj.image.url
         return obj.image.url
 
 
@@ -345,7 +342,6 @@ class ShowFollowUserListOrDetailSerializer(serializers.ModelSerializer):
             "recipes",
             "recipes_count",
         )
-        # read_only_fields = fields
 
     def get_is_subscribed(self, obj):
         user = self.context.user
@@ -383,7 +379,6 @@ class FollowCreateSerializer(serializers.ModelSerializer):
 
         if method == "GET":
             if user == author or follow_exist:
-                print(follow_exist)
                 raise serializers.ValidationError(
                     ("Подписка уже существует."
                      "Оформить подписку на самого себя, невозможно")

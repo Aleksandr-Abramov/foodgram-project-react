@@ -1,27 +1,9 @@
-# from django.contrib import admin
-#
-# from .models import (Follow,
-#                      Recipe,
-#                      RecipeIngredient,
-#                      Tag, Ingredient,
-#                      Favorite, ShoppingCart)
-#
-#
-# admin.site.register(Follow)
-# admin.site.register(Recipe)
-# admin.site.register(RecipeIngredient)
-# admin.site.register(Tag)
-# admin.site.register(Ingredient)
-# admin.site.register(Favorite)
-# admin.site.register(ShoppingCart)
 from django.contrib import admin
 
-# from .models import Recipe, Ingredient, Tag, ShoppingCart, Favorite
 from .models import (Favorite, Follow, Ingredient, Recipe, RecipeIngredient,
                      ShoppingCart, Tag)
 
 
-# admin.site.register(Recipe)
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     fields = ('author',
@@ -34,6 +16,11 @@ class RecipeAdmin(admin.ModelAdmin):
               )
     readonly_fields = (
         'pub_date',
+    )
+    search_fields = (
+        'name',
+        'author__username',
+        'tags__name',
     )
     empty_value_display = '-пусто-'
 
@@ -48,6 +35,19 @@ class IngredientAdmin(admin.ModelAdmin):
         'name',
     )
     empty_value_display = '-пусто-'
+
+
+@admin.register(RecipeIngredient)
+class RecipeIngredientAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'recipe',
+        'ingredient',
+        'amount',
+    )
+    search_fields = (
+        'name',
+    )
 
 
 @admin.register(Tag)
@@ -86,3 +86,11 @@ class ShoppingCartAdmin(admin.ModelAdmin):
         'user',
         'recipe'
     )
+
+
+@admin.register(Follow)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('id',
+                    'user',
+                    'author',
+                    )

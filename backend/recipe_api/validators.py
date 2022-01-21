@@ -6,3 +6,10 @@ def validation_hex(value):
         raise ValidationError(
             "Оформите цвет в HEX формате. Пример: #000000"
         )
+
+
+def greater_than_zero(value):
+    if value <= 0:
+        raise ValidationError(
+            "Число должно быть больше 0."
+        )

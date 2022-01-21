@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from .validators import validation_hex
+from .validators import greater_than_zero, validation_hex
 
 User = get_user_model()
 
@@ -18,8 +18,8 @@ class Ingredient(models.Model):
 
     class Meta:
         ordering = ("name",)
-        verbose_name = "Ингридиент"
-        verbose_name_plural = "Ингридиенты"
+        verbose_name = "Ингредиент"
+        verbose_name_plural = "Ингредиенты"
 
     def __str__(self):
         return f'{self.name} {self.measurement_unit}'
@@ -75,7 +75,9 @@ class Recipe(models.Model):
     text = models.TextField(
         verbose_name="Описание рецепта"
     )
-    cooking_time = models.PositiveSmallIntegerField()
+    cooking_time = models.PositiveSmallIntegerField(
+        validators=[greater_than_zero]
+    )
 
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации',
@@ -89,7 +91,7 @@ class Recipe(models.Model):
         verbose_name_plural = "Рецепты"
 
     def __str__(self):
-        return self.name
+        return f'{self.name} {self.author}'
 
 
 class RecipeIngredient(models.Model):
@@ -105,15 +107,17 @@ class RecipeIngredient(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         verbose_name="Количество",
-        default=1
+        default=1,
+        validators=[greater_than_zero]
+
     )
 
     class Meta:
-        verbose_name = "Ингридиенты"
-        verbose_name_plural = "Ингридиенты"
+        verbose_name = "Ингредиенты в рецептах"
+        verbose_name_plural = "Ингредиенты в рецептах"
 
     def __str__(self):
-        return "Ингридиент в рецепте"
+        return "Ингредиент в рецепте"
 
 
 class Follow(models.Model):
