@@ -173,7 +173,15 @@ class FollowCreateDelete(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserIdRetrieveAPIView(generics.RetrieveAPIView):
+class UserIdRetrieveAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated, ]
-    queryset = User.objects.all()
-    serializer_class = ShowUserIdSerializer
+    serializer_class = ShowFollowUserListOrDetailSerializer
+
+
+    def get_queryset(self):
+        user = self.request.user.id
+        return User.objects.filter(id=user)
+
+    def get_serializer_context(self):
+        context = self.request
+        return context
