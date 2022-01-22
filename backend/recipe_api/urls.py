@@ -13,7 +13,7 @@ router.register("ingredients", IngredientViewSet,)
 
 
 urlpatterns = [
-    path("users/<int:pk>", UserIdRetrieveAPIView.as_view()),
+    path("user/<int:pk>", UserIdRetrieveAPIView.as_view()),
     path("recipes/download_shopping_cart/",
          ShoppingCartDownloadsAPIView.as_view()),
     path("recipes/<int:recipe_id>/favorite/",
