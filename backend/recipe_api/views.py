@@ -16,8 +16,7 @@ from .permissions import AdminOrAuthorOrReadOnly
 from .serializers import (FavoriteSerializer, FollowCreateSerializer,
                           IngredientSerializer, RecipeCreateSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
-                          ShowFollowUserListOrDetailSerializer,
-                          ShowUserIdSerializer, TagsSerializer)
+                          ShowFollowUserListOrDetailSerializer, TagsSerializer)
 
 User = get_user_model()
 
@@ -176,7 +175,6 @@ class FollowCreateDelete(APIView):
 class UserIdRetrieveAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated, ]
     serializer_class = ShowFollowUserListOrDetailSerializer
-
 
     def get_queryset(self):
         user = self.request.user.id
