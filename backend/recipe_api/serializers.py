@@ -70,8 +70,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        request = self.context.get('request')
-        context = {'request': request}
+        request = self.context.get("request")
+        context = {"request": request}
         data = FavoriteDetailSerializer(
             instance.recipe,
             context=context
@@ -87,7 +87,7 @@ class ShoppingCartSerializer(FavoriteSerializer):
     def validate(self, data):
         user = self.context.get("request").user
         recipe_id = data["recipe"].id
-        if (self.context.get('request').method == 'GET'
+        if (self.context.get("request").method == "GET"
                 and ShoppingCart.objects.filter(
                     user=user,
                     recipe=recipe_id
@@ -114,7 +114,7 @@ class RecipeUserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         if request is None or request.user.is_anonymous:
             return False
         return Follow.objects.filter(user=request.user, author=obj).exists()
@@ -237,9 +237,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                     "Количество должно быть положительным!")
 
         for item in ingredients:
-            if correct_ingredients.count(item['id']):
+            if correct_ingredients.count(item["id"]):
                 raise serializers.ValidationError(
-                    {'ingredients': 'В рецепте дублирующиеся ингредиенты!'}
+                    {"ingredients": "В рецепте дублирующиеся ингредиенты!"}
                 )
             else:
                 correct_ingredients.append(item['id'])
@@ -249,8 +249,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def validate_cooking_time(self, data):
         if data <= 0:
             raise serializers.ValidationError(
-                'Время готовки не может быть'
-                ' отрицательным числом или нулем!')
+                "Время готовки не может быть"
+                " отрицательным числом или нулем!")
         return data
 
     def create(self, validated_data):
@@ -287,8 +287,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             recipe.ingredients.clear()
             RecipeIngredient.objects.filter(recipe=recipe).delete()
             for ingredient in data_ingredients:
-                ingredient_id = ingredient['id']
-                amount = ingredient['amount']
+                ingredient_id = ingredient["id"]
+                amount = ingredient["amount"]
 
                 RecipeIngredient.objects.update_or_create(
                     recipe=recipe, ingredient=ingredient_id,
@@ -301,7 +301,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         data = RecipeSerializer(
             instance,
             context={
-                'request': self.context.get('request')
+                "request": self.context.get("request")
             }
         ).data
         data["image"] = instance.image.url
@@ -395,4 +395,25 @@ class FollowCreateSerializer(serializers.ModelSerializer):
         return ShowFollowUserListOrDetailSerializer(
             instance["author"],
             context=context
+        ).data
+
+
+class ShowUserIdSerializer(serializers.ModelSerializer):
+    recipes = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "recipes",
+        )
+
+    def get_recipes(self, obj):
+        return ShowFollowRecipeUserSerializer(
+            obj.recipes.all(),
+            many=True
         ).data

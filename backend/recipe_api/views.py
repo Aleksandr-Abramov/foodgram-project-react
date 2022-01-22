@@ -16,7 +16,8 @@ from .permissions import AdminOrAuthorOrReadOnly
 from .serializers import (FavoriteSerializer, FollowCreateSerializer,
                           IngredientSerializer, RecipeCreateSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
-                          ShowFollowUserListOrDetailSerializer, TagsSerializer)
+                          ShowFollowUserListOrDetailSerializer,
+                          ShowUserIdSerializer, TagsSerializer)
 
 User = get_user_model()
 
@@ -170,3 +171,8 @@ class FollowCreateDelete(APIView):
         obj = get_object_or_404(Follow, user=user, author=author)
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserIdRetrieveAPIView(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = ShowUserIdSerializer

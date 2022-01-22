@@ -11,5 +11,5 @@ def validation_hex(value):
 def greater_than_zero(value):
     if value <= 0:
         raise ValidationError(
-            "Число должно быть больше 0."
+            f"Вы ввели количество:{value}. Число должно быть больше 0."
         )
