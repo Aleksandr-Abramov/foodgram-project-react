@@ -16,7 +16,7 @@ from .permissions import AdminOrAuthorOrReadOnly
 from .serializers import (FavoriteSerializer, FollowCreateSerializer,
                           IngredientSerializer, RecipeCreateSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
-                          ShowFollowUserListOrDetailSerializer, TagsSerializer)
+                          ShowFollowUserListOrDetailSerializer, TagsSerializer, ShowUserIdSerializer)
 
 User = get_user_model()
 
@@ -172,14 +172,19 @@ class FollowCreateDelete(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserIdRetrieveAPIView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated, ]
-    serializer_class = ShowFollowUserListOrDetailSerializer
+class UserIdRetrieveAPIView(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+    permission_classes = [AdminOrAuthorOrReadOnly, ]
+    filter_backends = [DjangoFilterBackend, ]
+    filterset_class = RecipeFilter
 
-    def get_queryset(self):
-        user = self.request.user.id
-        return User.objects.filter(id=user)
+    def get_serializer_class(self):
+        method = self.request.method
+        if method == "GET":
+            return RecipeSerializer
+        return RecipeCreateSerializer
 
     def get_serializer_context(self):
-        context = self.request
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
         return context

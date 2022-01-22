@@ -10,10 +10,11 @@ router = DefaultRouter()
 router.register("recipes", RecipeViewSet,)
 router.register("tags", TagsViewSet,)
 router.register("ingredients", IngredientViewSet,)
+router.register("user", UserIdRetrieveAPIView,)
 
 
 urlpatterns = [
-    path("user/<int:pk>", UserIdRetrieveAPIView.as_view()),
+    # path("user/<int:pk>/", UserIdRetrieveAPIView.as_view()),
     path("recipes/download_shopping_cart/",
          ShoppingCartDownloadsAPIView.as_view()),
     path("recipes/<int:recipe_id>/favorite/",

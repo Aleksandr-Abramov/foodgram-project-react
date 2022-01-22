@@ -399,7 +399,12 @@ class FollowCreateSerializer(serializers.ModelSerializer):
 
 
 class ShowUserIdSerializer(serializers.ModelSerializer):
+    # is_subscribed = serializers.SerializerMethodField()
+    # recipes_count = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
+    #
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -409,11 +414,34 @@ class ShowUserIdSerializer(serializers.ModelSerializer):
             "username",
             "first_name",
             "last_name",
+            # "is_subscribed",
             "recipes",
+            "is_favorited",
+            "is_in_shopping_cart",
+            # "recipes_count",
         )
+
+    def get_is_subscribed(self, obj):
+        user = self.context.user
+        author = obj
+        return Follow.objects.filter(
+            user=user,
+            author=author
+        ).exists()
 
     def get_recipes(self, obj):
         return ShowFollowRecipeUserSerializer(
             obj.recipes.all(),
             many=True
         ).data
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
+
+    def get_is_favorited(self, recipe ):
+
+        return True
+
+    def get_is_in_shopping_cart(self, recipe ):
+
+        return True
