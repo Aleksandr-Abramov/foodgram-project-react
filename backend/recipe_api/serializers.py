@@ -399,49 +399,45 @@ class FollowCreateSerializer(serializers.ModelSerializer):
 
 
 class ShowUserIdSerializer(serializers.ModelSerializer):
-    # is_subscribed = serializers.SerializerMethodField()
-    # recipes_count = serializers.SerializerMethodField()
-    recipes = serializers.SerializerMethodField()
-    #
+    ingredients = serializers.SerializerMethodField()
+    author = RecipeUserSerializer(many=False)
+    tags = TagsSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
-        model = User
+        model = Recipe
         fields = (
-            "email",
             "id",
-            "username",
-            "first_name",
-            "last_name",
-            # "is_subscribed",
-            "recipes",
+            "tags",
+            "author",
+            "ingredients",
             "is_favorited",
             "is_in_shopping_cart",
-            # "recipes_count",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
         )
 
-    def get_is_subscribed(self, obj):
-        user = self.context.user
-        author = obj
-        return Follow.objects.filter(
-            user=user,
-            author=author
-        ).exists()
+    def get_ingredients(self, obj):
+        data = RecipeIngredient.objects.filter(recipe=obj)
+        return ShowIngredientsInRecipe(data, many=True).data
 
-    def get_recipes(self, obj):
-        return ShowFollowRecipeUserSerializer(
-            obj.recipes.all(),
-            many=True
-        ).data
+    def get_is_favorited(self, recipe):
+        request = self.context.get("request")
+        if not request or request.user.is_anonymous:
+            return False
+        user = self.context.get("request").user
+        return Favorite.objects.filter(user=user, recipe=recipe).exists()
 
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
+    def get_is_in_shopping_cart(self, recipe):
+        request = self.context.get("request")
+        if not request or request.user.is_anonymous:
+            return False
+        user = request.user
+        return ShoppingCart.objects.filter(recipe=recipe, user=user).exists()
 
-    def get_is_favorited(self, recipe ):
-
-        return True
-
-    def get_is_in_shopping_cart(self, recipe ):
-
-        return True
+    def get_image(self, obj):
+        return obj.image.url

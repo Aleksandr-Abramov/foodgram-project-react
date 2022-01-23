@@ -9,14 +9,15 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .filters import IngredientFilter, RecipeFilter, TagsFilter
+from .filters import (IngredientFilter, RecipeFilter, RecipeUserFilter,
+                      TagsFilter)
 from .models import (Favorite, Follow, Ingredient, Recipe, RecipeIngredient,
                      ShoppingCart, Tag)
 from .permissions import AdminOrAuthorOrReadOnly
 from .serializers import (FavoriteSerializer, FollowCreateSerializer,
                           IngredientSerializer, RecipeCreateSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
-                          ShowFollowUserListOrDetailSerializer, TagsSerializer, ShowUserIdSerializer)
+                          ShowFollowUserListOrDetailSerializer, TagsSerializer)
 
 User = get_user_model()
 
@@ -172,11 +173,11 @@ class FollowCreateDelete(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserIdRetrieveAPIView(viewsets.ModelViewSet):
+class UserIdViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = [AdminOrAuthorOrReadOnly, ]
     filter_backends = [DjangoFilterBackend, ]
-    filterset_class = RecipeFilter
+    filterset_class = RecipeUserFilter
 
     def get_serializer_class(self):
         method = self.request.method
