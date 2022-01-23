@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .filters import (IngredientFilter, RecipeFilter, RecipeUserFilter,
+from .filters import (IngredientFilter, RecipeFilter,
                       TagsFilter)
 from .models import (Favorite, Follow, Ingredient, Recipe, RecipeIngredient,
                      ShoppingCart, Tag)
@@ -173,19 +173,19 @@ class FollowCreateDelete(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserIdViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
-    permission_classes = [IsAuthenticated, ]
-    filter_backends = [DjangoFilterBackend, ]
-    filterset_class = RecipeUserFilter
-
-    def get_serializer_class(self):
-        method = self.request.method
-        if method == "GET":
-            return RecipeSerializer
-        return RecipeCreateSerializer
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context.update({'request': self.request})
-        return context
+# class UserIdViewSet(viewsets.ModelViewSet):
+#     queryset = Recipe.objects.all()
+#     permission_classes = [IsAuthenticated, ]
+#     filter_backends = [DjangoFilterBackend, ]
+#     filterset_class = RecipeUserFilter
+#
+#     def get_serializer_class(self):
+#         method = self.request.method
+#         if method == "GET":
+#             return RecipeSerializer
+#         return RecipeCreateSerializer
+#
+#     def get_serializer_context(self):
+#         context = super().get_serializer_context()
+#         context.update({'request': self.request})
+#         return context
