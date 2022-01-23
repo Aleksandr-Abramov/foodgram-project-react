@@ -68,19 +68,19 @@ class RecipeUserFilter(filters.FilterSet):
     author = filters.CharFilter(
         field_name="author__id"
     )
-    is_favorited = filters.BooleanFilter(
-        method="get_favorite"
-    )
-    is_in_shopping_cart = filters.BooleanFilter(
-        method="get_is_in_shopping_cart"
-    )
+    # is_favorited = filters.BooleanFilter(
+    #     method="get_favorite"
+    # )
+    # is_in_shopping_cart = filters.BooleanFilter(
+    #     method="get_is_in_shopping_cart"
+    # )
 
     class Meta:
         model = Recipe
         fields = ("tags",
                   "author",
-                  "is_in_shopping_cart",
-                  "is_favorited"
+                  # "is_in_shopping_cart",
+                  # "is_favorited"
                   )
 
     def get_favorite(self, queryset, name, value):

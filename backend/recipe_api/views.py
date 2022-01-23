@@ -175,7 +175,7 @@ class FollowCreateDelete(APIView):
 
 class UserIdViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = [AdminOrAuthorOrReadOnly, ]
+    permission_classes = [IsAuthenticated, ]
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeUserFilter
 
