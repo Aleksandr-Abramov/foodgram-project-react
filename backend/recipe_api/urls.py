@@ -4,13 +4,12 @@ from rest_framework.routers import DefaultRouter
 from .views import (DockTemplate, FavoriteAPIView, FollowCreateDelete,
                     IngredientViewSet, RecipeViewSet, ShoppingCartAPIView,
                     ShoppingCartDownloadsAPIView, ShowListUserFollow,
-                    TagsViewSet,) #UserIdViewSet)
+                    TagsViewSet)
 
 router = DefaultRouter()
 router.register("recipes", RecipeViewSet,)
 router.register("tags", TagsViewSet,)
 router.register("ingredients", IngredientViewSet,)
-# router.register("user", UserIdViewSet,)
 
 
 urlpatterns = [
